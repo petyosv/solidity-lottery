@@ -36,15 +36,6 @@ contract TicketFactory is Ownable {
   }
 
   /**
-   * @dev Deploy new proxy contract and set the ticket implementation.
-   */
-  function create() public isOwner {
-    TicketProxy _proxy = new TicketProxy();
-    _proxy.setImplementation(ticket);
-    proxies.push(_proxy);
-  }
-
-  /**
    * @dev Retrieve all proxies.
    *
    * @return Array of all created proxies.
@@ -60,5 +51,37 @@ contract TicketFactory is Ownable {
    */
   function getProxyAddress(uint256 _index) public view returns(address) {
     return address(proxies[_index]);
+  }
+
+  /**
+   * @dev Get Proxy creation code as bytes.
+   */
+  function getBytecode() private pure returns(bytes memory) {
+    bytes memory _bytecode = type(TicketProxy).creationCode;
+    return _bytecode;
+  }
+
+  /**
+   * @dev Deploy new proxy contract using create2 and set the ticket implementation.
+   */
+  function deploy() public isOwner {
+    address payable _address;
+    uint _salt = proxies.length;
+    bytes memory _bytecode = getBytecode();
+
+    assembly {
+      _address := create2(
+        callvalue(),
+        add(_bytecode, 0x20),
+        mload(_bytecode),
+        _salt
+      )
+      if iszero(extcodesize(_address)) {
+        revert(0, 0)
+      }
+    }
+    TicketProxy _proxy = TicketProxy(_address);
+    _proxy.setImplementation(ticket);
+    proxies.push(_proxy);
   }
 }

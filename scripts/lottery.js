@@ -24,7 +24,7 @@ async function main() {
 
   console.log("Ticket Factory contract has been deployed to:", factory.address);
 
-  await factory.create();
+  await factory.deploy();
   const address = await factory.getProxyAddress(0);
   const proxy = await hre.ethers.getContractAt("TicketProxy", address);
 

@@ -20,7 +20,7 @@ beforeEach(async () => {
   const Factory = await ethers.getContractFactory("TicketFactory");
   factory = await Factory.deploy(ticket.address);
 
-  await factory.create();
+  await factory.deploy();
   const address = await factory.getProxyAddress(0);
   proxy = await ethers.getContractAt("TicketProxy", address);
 
