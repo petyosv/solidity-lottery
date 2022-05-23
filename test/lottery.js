@@ -65,7 +65,7 @@ describe("Proxy", function () {
       value: ethers.utils.parseEther("0.001")
     })).to.be.ok;
 
-    await factory.create();
+    await factory.deploy();
     const address = await factory.getProxyAddress(1);
     const proxy_2 = await ethers.getContractAt("TicketProxy", address);
 
