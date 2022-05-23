@@ -1,12 +1,19 @@
 {
   "name": "hardhat-project",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "postinstall": "patch-package"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "bs58": "^5.0.0",
     "chai": "^4.3.6",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.7",
-    "hardhat": "^2.9.6"
-  },
-  "dependencies": {}
+    "hardhat": "^2.9.6",
+    "hardhat-ipfs": "^0.0.1"
+  }
 }

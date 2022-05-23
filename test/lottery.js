@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, ipfs } = require("hardhat");
 
 let factory, ticket, proxy, implementation, addressArray;
 let accounts;
@@ -29,7 +29,43 @@ beforeEach(async () => {
 
 });
 
-describe("Proxy", function () {
+describe("Off-chain storage", () => {
+
+  it("Saving number of tickets for each account", async () => {
+    let data = {};
+    let cid, hash;
+
+    for (let i = 1; i < accounts.length; i++) {
+      await implementation.connect(accounts[i]).buyTicket({
+        value: ethers.utils.parseEther("0.001")
+      });
+      data[await accounts[i].getAddress()] = 1;
+    }
+
+    await implementation.connect(accounts[1]).buyTicket({
+      value: ethers.utils.parseEther("0.001")
+    });
+    data[await accounts[1].getAddress()] += 1;
+
+    cid = await ipfs.hashCID(JSON.stringify(data));
+    await implementation.setIPFSHash(
+      ethers.utils.hexlify(
+        ethers.utils.base58.decode(cid.toString()).slice(2)
+      )
+    );
+
+    hash = await implementation.getIPFSHash();
+    hash = ethers.utils.base58.encode(Buffer.from('1220' + hash.slice(2), 'hex'));
+
+    data = await ipfs.getData(hash);
+    data = JSON.parse(data);
+    expect(JSON.parse(data)).to.have.property(await accounts[1].getAddress()).to.be.equal(2);
+    expect(JSON.parse(data)).to.have.property(await accounts[2].getAddress()).to.be.equal(1);
+  });
+
+});
+
+describe("Proxy", () => {
 
   it("The proxy points to an implementation contract.", async () => {
     expect(await proxy.getImplementation()).to.eq(ticket.address);
@@ -81,7 +117,7 @@ describe("Proxy", function () {
 });
 
 
-describe("Buy a ticket", function () {
+describe("Buy a ticket", () => {
 
   it("The value does not match the ticket price.", async () => {
     await expect(
@@ -127,7 +163,7 @@ describe("Buy a ticket", function () {
 
 });
 
-describe("Pick a surprise winner", function () {
+describe("Pick a surprise winner", () => {
 
   it("Owner is trying to pick a surprise winner with no tickets sold.", async () => {
     await expect(
@@ -185,7 +221,7 @@ describe("Pick a surprise winner", function () {
 
 });
 
-describe("Pick a winner", function () {
+describe("Pick a winner", () => {
 
   it("The owner is picking a winner while the lottery is active.", async () => {
     await expect(

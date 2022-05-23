@@ -17,6 +17,7 @@ contract Ticket_v1 is Ownable {
   uint256 startTime;
   uint256 blockTime;
   address[] players;
+  bytes32 ipfs;
 
   /**
    * @dev Check if the send ethers match the price of the ticket.
@@ -101,6 +102,20 @@ contract Ticket_v1 is Ownable {
    */
   function getWinningPrice() public view returns (uint256) {
     return address(this).balance;
+  }
+
+  /**
+   * @dev Save IPFS Hash for off-chain storage.
+   */
+  function setIPFSHash(bytes32 _hash) public isOwner {
+    ipfs = _hash;
+  }
+
+  /**
+   * @dev Retrieve IPFS Hash for off-chain storage.
+   */
+  function getIPFSHash() public view returns(bytes32) {
+    return ipfs;
   }
 
 }
